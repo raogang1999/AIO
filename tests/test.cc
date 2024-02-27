@@ -19,13 +19,13 @@ int main(int argc, char **argv) {
     // AIO::LogEvent::ptr event(new AIO::LogEvent(__FILE__,__LINE__,0,AIO::GetThreadId(),AIO::GetFiberId(),time(0)));
     // logger->log(AIO::LogLevel::FATAL,event);
     std::cout << "hello AIO Log" << std::endl;
-    GANG_LOG_DEBUG(logger) << " any thing ?";
-    GANG_LOG_INFO(logger) << " infomation ";
-    GANG_LOG_FATAL(logger) << " Fatal ";
+    AIO_LOG_DEBUG(logger) << " any thing ?";
+    AIO_LOG_INFO(logger) << " infomation ";
+    AIO_LOG_FATAL(logger) << " Fatal ";
 
-    GANG_LOG_FMT_INFO(logger, "test fmt %s", "abc");
+    AIO_LOG_FMT_INFO(logger, "test fmt %s", "abc");
 
     auto l = AIO::LoggerMgr::GetInstance()->getLogger("xx");
-    GANG_LOG_DEBUG(l) << "xxx";
+    AIO_LOG_DEBUG(l) << "xxx";
     return 0;
 }

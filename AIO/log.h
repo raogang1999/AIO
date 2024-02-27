@@ -17,28 +17,28 @@
 #include <map>
 
 
-#define GANG_LOG_LEVEL(logger, level)\
+#define AIO_LOG_LEVEL(logger, level)\
     if (logger->getLevel() <= level)\
         AIO::LogEventWrap(AIO::LogEvent::ptr(\
         new AIO::LogEvent(logger,level,__FILE__,__LINE__,0,AIO::GetThreadId(),AIO::GetFiberId(),time(0)))).getSS()
-#define GANG_LOG_DEBUG(logger) GANG_LOG_LEVEL(logger,AIO::LogLevel::DEBUG)
-#define GANG_LOG_INFO(logger) GANG_LOG_LEVEL(logger,AIO::LogLevel::INFO)
-#define GANG_LOG_WARN(logger) GANG_LOG_LEVEL(logger,AIO::LogLevel::WARN)
-#define GANG_LOG_ERROR(logger) GANG_LOG_LEVEL(logger,AIO::LogLevel::ERROR)
-#define GANG_LOG_FATAL(logger) GANG_LOG_LEVEL(logger,AIO::LogLevel::FATAL)
+#define AIO_LOG_DEBUG(logger) AIO_LOG_LEVEL(logger,AIO::LogLevel::DEBUG)
+#define AIO_LOG_INFO(logger) AIO_LOG_LEVEL(logger,AIO::LogLevel::INFO)
+#define AIO_LOG_WARN(logger) AIO_LOG_LEVEL(logger,AIO::LogLevel::WARN)
+#define AIO_LOG_ERROR(logger) AIO_LOG_LEVEL(logger,AIO::LogLevel::ERROR)
+#define AIO_LOG_FATAL(logger) AIO_LOG_LEVEL(logger,AIO::LogLevel::FATAL)
 
-#define GANG_LOG_FMT_LEVEL(logger, level, fmt, ...)\
+#define AIO_LOG_FMT_LEVEL(logger, level, fmt, ...)\
     if(logger->getLevel()<=level)\
         AIO::LogEventWrap(AIO::LogEvent::ptr(\
         new AIO::LogEvent(logger,level,__FILE__,__LINE__,0,AIO::GetThreadId(),\
         AIO::GetFiberId(),time(0)))).getEvent()->format(fmt,__VA_ARGS__)
 
 
-#define GANG_LOG_FMT_DEBUG(logger, fmt, ...) GANG_LOG_FMT_LEVEL(logger,AIO::LogLevel::DEBUG,fmt,__VA_ARGS__)
-#define GANG_LOG_FMT_INFO(logger, fmt, ...) GANG_LOG_FMT_LEVEL(logger,AIO::LogLevel::INFO,fmt,__VA_ARGS__)
-#define GANG_LOG_FMT_WARN(logger, fmt, ...) GANG_LOG_FMT_LEVEL(logger,AIO::LogLevel::WARN,fmt,__VA_ARGS__)
-#define GANG_LOG_FMT_ERROR(logger, fmt, ...) GANG_LOG_FMT_LEVEL(logger,AIO::LogLevel::ERROR,fmt,__VA_ARGS__)
-#define GANG_LOG_FMT_FATAL(logger, fmt, ...) GANG_LOG_FMT_LEVEL(logger,AIO::LogLevel::FATAL,fmt,__VA_ARGS__)
+#define AIO_LOG_FMT_DEBUG(logger, fmt, ...) AIO_LOG_FMT_LEVEL(logger,AIO::LogLevel::DEBUG,fmt,__VA_ARGS__)
+#define AIO_LOG_FMT_INFO(logger, fmt, ...) AIO_LOG_FMT_LEVEL(logger,AIO::LogLevel::INFO,fmt,__VA_ARGS__)
+#define AIO_LOG_FMT_WARN(logger, fmt, ...) AIO_LOG_FMT_LEVEL(logger,AIO::LogLevel::WARN,fmt,__VA_ARGS__)
+#define AIO_LOG_FMT_ERROR(logger, fmt, ...) AIO_LOG_FMT_LEVEL(logger,AIO::LogLevel::ERROR,fmt,__VA_ARGS__)
+#define AIO_LOG_FMT_FATAL(logger, fmt, ...) AIO_LOG_FMT_LEVEL(logger,AIO::LogLevel::FATAL,fmt,__VA_ARGS__)
 
 
 namespace AIO {
