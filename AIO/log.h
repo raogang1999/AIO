@@ -15,6 +15,7 @@
 #include <sstream>
 #include "singleton.h"
 #include <map>
+#include "util.h"
 
 
 #define AIO_LOG_LEVEL(logger, level)\
@@ -40,9 +41,15 @@
 #define AIO_LOG_FMT_ERROR(logger, fmt, ...) AIO_LOG_FMT_LEVEL(logger,AIO::LogLevel::ERROR,fmt,__VA_ARGS__)
 #define AIO_LOG_FMT_FATAL(logger, fmt, ...) AIO_LOG_FMT_LEVEL(logger,AIO::LogLevel::FATAL,fmt,__VA_ARGS__)
 
+#define AIO_LOG_ROOT() AIO::LoggerMgr::GetInstance()->getRoot()
+
+
+#define AIO_LOG_NAME(name) AIO::LoggerMgr::GetInstance()->getLogger(name)
 
 namespace AIO {
     class Logger;
+
+    class LoggerManager;
 
 
     //日志级别
@@ -58,6 +65,8 @@ namespace AIO {
         };
 
         static const char *ToString(LogLevel::Level level);
+
+        static LogLevel::Level FromString(const std::string &level);
     };
 
     //元数据
@@ -149,6 +158,9 @@ namespace AIO {
             format(std::ostream &os, std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) = 0;
         };
 
+        bool isError() const { return m_error; };
+
+        const std::string getPattern() const { return m_pattern; };
     private:
         std::string m_pattern;
         std::vector<FormatItem::ptr> m_items;
@@ -158,6 +170,7 @@ namespace AIO {
     //输出
     // appender 负责将event 格式化后输出到指定位置
     class LogAppender {
+        friend Logger;
     public:
         typedef std::shared_ptr<LogAppender> ptr;
 
@@ -165,7 +178,7 @@ namespace AIO {
 
         virtual void log(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) = 0;
 
-        void setFormatter(LogFormatter::ptr val) { m_formatter = val; }
+        void setFormatter(LogFormatter::ptr val) ;
 
         LogFormatter::ptr getFormatter() { return m_formatter; }
 
@@ -173,9 +186,14 @@ namespace AIO {
 
         LogLevel::Level getLevel() { return m_level; }
 
+        virtual std::string toYamlString() = 0;
+
+
     protected:
         LogLevel::Level m_level = LogLevel::DEBUG;
         LogFormatter::ptr m_formatter;
+        bool m_hasFormatter = false;
+
 
     };
 
@@ -183,6 +201,8 @@ namespace AIO {
     // 日志器相当于总控，提供调用接口，
     // 它底层，调用 具体的appender 使用formatter 将 event 输出到 目的地
     class Logger : public std::enable_shared_from_this<Logger> {
+        friend class LoggerManager;
+
     public:
         typedef std::shared_ptr<Logger> ptr;
 
@@ -204,17 +224,30 @@ namespace AIO {
 
         void delAppender(LogAppender::ptr appender);
 
+        void clearAppender();
+
         LogLevel::Level getLevel() const { return m_level; }
 
         void setLevel(LogLevel::Level val) { m_level = val; }
 
         const std::string &getName() const { return m_name; }
 
+        void setFormatter(LogFormatter::ptr val);
+
+        void setFormatter(const std::string &val);
+
+        LogFormatter::ptr getFormatter();
+
+        std::string toYamlString();
+
+
     private:
         std::string m_name;    // 日志名称
         LogLevel::Level m_level;// 日志级别
         std::list<LogAppender::ptr> m_appenders;// 日志输出集合
         LogFormatter::ptr m_formatter;
+        //主日志器
+        Logger::ptr m_root;
 
     };
 
@@ -224,6 +257,8 @@ namespace AIO {
         typedef std::shared_ptr<StdoutLogAppender> ptr;
 
         virtual void log(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) override;
+
+        virtual std::string toYamlString() override;
 
 
     };
@@ -239,6 +274,8 @@ namespace AIO {
 
         virtual void log(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) override;
 
+        virtual std::string toYamlString() override;
+
     private:
         std::string m_filename;
         std::ofstream m_filestream;
@@ -252,6 +289,10 @@ namespace AIO {
         Logger::ptr getLogger(const std::string &name);
 
         void init();
+
+        Logger::ptr getRoot() const { return m_root; }
+
+        std::string toYamlString();
 
     private:
         std::map<std::string, Logger::ptr> m_loggers;//日志管理器
