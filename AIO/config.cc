@@ -7,6 +7,7 @@ namespace AIO {
 //    Config::ConfigVarMap Config::s_datas; // 定义
 
     ConfigVarBase::ptr Config::LookupBase(const std::string &name) {
+        RWMutexType::ReadLock lock(GetRWMutex());
         auto it = GetDatas().find(name);
         return it == GetDatas().end() ? nullptr : it->second;
     }
@@ -62,5 +63,13 @@ namespace AIO {
 
         }
 
+    }
+
+    void Config::Visit(std::function<void(ConfigVarBase::ptr)> cb) {
+        RWMutexType::ReadLock lock(GetRWMutex());
+        ConfigVarMap &m = GetDatas();
+        for (auto it = m.begin(); it != m.end(); ++it) {
+            cb(it->second);
+        }
     }
 }

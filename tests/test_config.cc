@@ -88,8 +88,6 @@ public:
 };
 
 
-
-
 namespace AIO {
     template<>
     class LexicalCast<std::string, Person> {
@@ -127,7 +125,7 @@ void test_class() {
                                                                                 std::vector<Person>{Person(), Person()},
                                                                                 "system person");
 
-    g_person_value_config->addListener(10, [](const Person &old_val, const Person &new_val) {
+    g_person_value_config->addListener([](const Person &old_val, const Person &new_val) {
         AIO_LOG_INFO(AIO_LOG_ROOT()) << "old to new callback: " << old_val.toString() << new_val.toString();
     });
     auto items = g_person_vec->getValue();
@@ -156,8 +154,7 @@ void test_log() {
     AIO::Config::LoadFromYaml(root);
     std::cout << "=========================" << std::endl;
     std::cout << AIO::LoggerMgr::GetInstance()->toYamlString() << std::endl;
-    AIO_LOG_INFO(system_log)<<"hello system"<<std::endl;
-
+    AIO_LOG_INFO(system_log) << "hello system" << std::endl;
 
 }
 
@@ -168,5 +165,11 @@ int main() {
 //    test_config();
 //    test_class();
     test_log();
+    AIO::Config::Visit([](AIO::ConfigVarBase::ptr var) {
+        AIO_LOG_INFO(AIO_LOG_ROOT()) << " name=" << var->getName()
+                                     << " description=" << var->getDescription()
+                                     << " value=" << var->toString();
+
+    });
     return 0;
 }

@@ -16,6 +16,7 @@
 #include "singleton.h"
 #include <map>
 #include "util.h"
+#include "thread.h"
 
 
 #define AIO_LOG_LEVEL(logger, level)\
@@ -173,14 +174,16 @@ namespace AIO {
         friend Logger;
     public:
         typedef std::shared_ptr<LogAppender> ptr;
+        typedef SpinLock MutexType;
+
 
         virtual ~LogAppender() {}
 
         virtual void log(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) = 0;
 
-        void setFormatter(LogFormatter::ptr val) ;
+        void setFormatter(LogFormatter::ptr val);
 
-        LogFormatter::ptr getFormatter() { return m_formatter; }
+        LogFormatter::ptr getFormatter();
 
         void setLevel(LogLevel::Level level) { m_level = level; };
 
@@ -192,6 +195,7 @@ namespace AIO {
     protected:
         LogLevel::Level m_level = LogLevel::DEBUG;
         LogFormatter::ptr m_formatter;
+        MutexType m_mutex;
         bool m_hasFormatter = false;
 
 
@@ -205,6 +209,8 @@ namespace AIO {
 
     public:
         typedef std::shared_ptr<Logger> ptr;
+        typedef SpinLock MutexType;
+
 
         Logger(const std::string &name = "root");
 
@@ -248,6 +254,7 @@ namespace AIO {
         LogFormatter::ptr m_formatter;
         //主日志器
         Logger::ptr m_root;
+        MutexType m_mutex;
 
     };
 
@@ -279,11 +286,14 @@ namespace AIO {
     private:
         std::string m_filename;
         std::ofstream m_filestream;
+        uint64_t m_lastTime;
     };
 
     //日志管理器，
     class LoggerManager {
     public:
+        typedef SpinLock MutexType;
+
         LoggerManager();
 
         Logger::ptr getLogger(const std::string &name);
@@ -297,6 +307,7 @@ namespace AIO {
     private:
         std::map<std::string, Logger::ptr> m_loggers;//日志管理器
         Logger::ptr m_root;//默认
+        MutexType m_mutex;
     };
 
     typedef AIO::Singleton<LoggerManager> LoggerMgr;
