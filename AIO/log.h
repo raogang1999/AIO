@@ -22,7 +22,7 @@
 #define AIO_LOG_LEVEL(logger, level)\
     if (logger->getLevel() <= level)\
         AIO::LogEventWrap(AIO::LogEvent::ptr(\
-        new AIO::LogEvent(logger,level,__FILE__,__LINE__,0,AIO::GetThreadId(),AIO::GetFiberId(),time(0)))).getSS()
+        new AIO::LogEvent(logger,level,__FILE__,__LINE__,0,AIO::GetThreadId(),AIO::GetFiberId(),time(0),AIO::Thread::GetName()))).getSS()
 #define AIO_LOG_DEBUG(logger) AIO_LOG_LEVEL(logger,AIO::LogLevel::DEBUG)
 #define AIO_LOG_INFO(logger) AIO_LOG_LEVEL(logger,AIO::LogLevel::INFO)
 #define AIO_LOG_WARN(logger) AIO_LOG_LEVEL(logger,AIO::LogLevel::WARN)
@@ -33,7 +33,7 @@
     if(logger->getLevel()<=level)\
         AIO::LogEventWrap(AIO::LogEvent::ptr(\
         new AIO::LogEvent(logger,level,__FILE__,__LINE__,0,AIO::GetThreadId(),\
-        AIO::GetFiberId(),time(0)))).getEvent()->format(fmt,__VA_ARGS__)
+        AIO::GetFiberId(),time(0),AIO::Thread::GetName()))).getEvent()->format(fmt,__VA_ARGS__)
 
 
 #define AIO_LOG_FMT_DEBUG(logger, fmt, ...) AIO_LOG_FMT_LEVEL(logger,AIO::LogLevel::DEBUG,fmt,__VA_ARGS__)
@@ -78,7 +78,7 @@ namespace AIO {
 
         LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level,
                  const char *file, int32_t m_line, uint32_t elapse, uint32_t thread_id, uint32_t fiber_id,
-                 uint64_t time);
+                 uint64_t time, const std::string &thread_name);
 
         const char *getFile() const { return m_file; }
 
@@ -87,6 +87,8 @@ namespace AIO {
         uint32_t getElapse() const { return m_elapse; }
 
         uint32_t getThreadId() const { return m_threadId; }
+
+        const std::string& getThreadName() const { return m_threadName; }
 
         uint32_t getFiberId() const { return m_fiberId; }
 
@@ -111,6 +113,7 @@ namespace AIO {
         uint32_t m_threadId = 0;//线程号
         uint32_t m_fiberId = 0;//协程号
         uint64_t m_time;//时间戳
+        std::string m_threadName;//线程名称
         std::stringstream m_ss;//内容
 
         std::shared_ptr<Logger> m_logger;
